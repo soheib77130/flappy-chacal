@@ -1,5 +1,5 @@
 {
-  "name": "clumsy-bird",
+  "name": "Flappy Chacal",
   "version": "0.1.0",
   "description": "Flappy Chacal le jeu officiel",
   "homepage": "http://ellisonleao.github.io/clumsy-bird/",
@@ -17,8 +17,8 @@
     }
   ],
   "author": {
-    "name": "Ellison Leão",
-    "email": "ellisonleao@gmail.com"
+    "name": "soheib",
+    "email": "soheib@gmail.com"
   },
   "engines": {
     "node": ">= 0.8.0"
