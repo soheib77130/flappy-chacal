@@ -1,6 +1,6 @@
 {
   "name": "Flappy chacal",
-  "description": "MelonJS Flapppy Bird Clone",
+  "description": "Flappy Chacal le jeu officiel",
   "repository": "https://github.com/ellisonleao/clumsy-bird",
   "logo": "https://raw.githubusercontent.com/ellisonleao/clumsy-bird/gh-pages/data/img/touch-icon-iphone.png",
   "keywords": ["grunt", "melonjs", "games"]
