@@ -55,3 +55,47 @@ body {
   position: absolute;
   left:23%;
 }
+
+button {
+  padding: 20px 50px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  border: 0px;
+  background: transparent;
+  position: relative;
+  transition: all .2s;
+  overflow: hidden;
+  color: ##15ff00;
+  border-radius: 30px;
+  box-shadow: 0px -0px 0px 0px rgba(143, 64,   248, .5), 0px 0px 0px 0px rgba(39, 200, 255, .5);
+}
+button::after {
+  content: '';
+  width: 400px;
+  height: 400px;
+  position: absolute;
+  top: -50px;
+  left: -100px;
+  background-image: linear-gradient(225deg,   #27d86c 0%, #26caf8 50%, #c625d0 100%);
+  z-index: -1;
+  transition: all .5s;
+}
+button:hover::after {
+  transform: rotate(150deg);
+}
+
+button:hover {
+  transform: translate(0,-6px);
+  box-shadow: 10px -10px 25px 0px rgba(143,   64, 248, .25), -10px 10px 25px 0px rgba(39, 200,   255, .25);
+}
+/*Ces styles ne sont là que pour la présentation*/
+div1{
+  border: 3px solid #3CC;
+  margin: 10px 10px;
+  padding: 10px;
+}
+
+/*Centre les éléments inline dans les éléments possédant un attribut class="centre"*/
+.centre{
+  text-align: center;
+}
