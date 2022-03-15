@@ -1,8 +1,9 @@
 body {
   background-color: #0099cc;  
- ​ ​color​:​ ​#​fff​;
+ ​ ​color​:​ ​#​fff;
 
-
+text-align: center;
+}
 @font-face {
   font-family: 'gamefont';
   src: url('data/css/gamefont.eot');
