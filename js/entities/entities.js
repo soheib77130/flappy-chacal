@@ -13,11 +13,9 @@ game.BirdEntity = me.Entity.extend({
         this.renderable.addAnimation("flying", [0, 1, 2]);
         this.renderable.addAnimation("idle", [0]);
         this.renderable.setCurrentAnimation("flying");
-        //this.renderable.anchorPoint = new me.Vector2d(0.1, 0.5);
         this.body.removeShapeAt(0);
         this.body.addShape(new me.Ellipse(5, 5, 71, 51));
 
-        // a tween object for the flying physic effect
         this.flyTween = new me.Tween(this.pos);
         this.flyTween.easing(me.Tween.Easing.Exponential.InOut);
 
@@ -25,10 +23,7 @@ game.BirdEntity = me.Entity.extend({
         this.angleTween = new me.Tween(this);
         this.angleTween.easing(me.Tween.Easing.Exponential.InOut);
 
-        // end animation tween
         this.endTween = null;
-
-        // collision shape
         this.collided = false;
 
         this.gravityForce = 0.2;
@@ -36,6 +31,7 @@ game.BirdEntity = me.Entity.extend({
 
     update: function(dt) {
         var that = this;
+        var difficulty = game.data.difficultySettings[game.data.difficulty];
         this.pos.x = 60;
         if (!game.data.start) {
             return this._super(me.Entity, 'update', [dt]);
@@ -43,23 +39,22 @@ game.BirdEntity = me.Entity.extend({
         this.renderable.currentTransform.identity();
         if (me.input.isKeyPressed('fly')) {
             me.audio.play('wing');
-            this.gravityForce = 0.2;
+            this.gravityForce = difficulty.gravityStep;
             var currentPos = this.pos.y;
 
             this.angleTween.stop();
             this.flyTween.stop();
 
-
-            this.flyTween.to({y: currentPos - 72}, 50);
+            this.flyTween.to({y: currentPos - difficulty.flapStrength}, 50);
             this.flyTween.start();
 
-            this.angleTween.to({currentAngle: that.maxAngleRotation}, 50).onComplete(function(angle) {
+            this.angleTween.to({currentAngle: that.maxAngleRotation}, 50).onComplete(function() {
                 that.renderable.currentTransform.rotate(that.maxAngleRotation);
-            })
+            });
             this.angleTween.start();
 
         } else {
-            this.gravityForce += 0.2;
+            this.gravityForce += difficulty.gravityStep;
             this.pos.y += me.timer.tick * this.gravityForce;
             this.currentAngle += Number.prototype.degToRad(3);
             if (this.currentAngle >= this.maxAngleRotationDown) {
@@ -70,7 +65,7 @@ game.BirdEntity = me.Entity.extend({
         this.renderable.currentTransform.rotate(this.currentAngle);
         me.Rect.prototype.updateBounds.apply(this);
 
-        var hitSky = -80; // bird height + 20px
+        var hitSky = -80;
         if (this.pos.y <= hitSky || this.collided) {
             game.data.start = false;
             me.audio.play("lose");
@@ -87,7 +82,6 @@ game.BirdEntity = me.Entity.extend({
             me.device.vibrate(500);
             this.collided = true;
         }
-        // remove the hit box
         if (obj.type === 'hit') {
             me.game.world.removeChildNow(obj);
             game.data.steps++;
@@ -129,23 +123,30 @@ game.PipeEntity = me.Entity.extend({
         this._super(me.Entity, 'init', [x, y, settings]);
         this.alwaysUpdate = true;
         this.body.gravity = 0;
-        this.body.vel.set(-5, 0);
         this.type = 'pipe';
+        this.baseY = y;
+        this.floatOffset = Number.prototype.random(0, 360);
     },
 
     update: function(dt) {
-        // mechanics
+        var difficulty = game.data.difficultySettings[game.data.difficulty];
         if (!game.data.start) {
             return this._super(me.Entity, 'update', [dt]);
         }
-        this.pos.add(this.body.vel);
+
+        this.pos.x += difficulty.pipeSpeed;
+
+        if (difficulty.movingPipes) {
+            this.pos.y = this.baseY + Math.sin((game.data.steps * 8 + me.timer.getTime() / 30 + this.floatOffset) * Math.PI / 180) * 14;
+        }
+
         if (this.pos.x < -this.image.width) {
             me.game.world.removeChild(this);
         }
         me.Rect.prototype.updateBounds.apply(this);
         this._super(me.Entity, 'update', [dt]);
         return true;
-    },
+    }
 
 });
 
@@ -154,18 +155,18 @@ game.PipeGenerator = me.Renderable.extend({
         this._super(me.Renderable, 'init', [0, me.game.viewport.width, me.game.viewport.height, 92]);
         this.alwaysUpdate = true;
         this.generate = 0;
-        this.pipeFrequency = 92;
-        this.pipeHoleSize = 1240;
         this.posX = me.game.viewport.width;
     },
 
     update: function(dt) {
-        if (this.generate++ % this.pipeFrequency == 0) {
+        var difficulty = game.data.difficultySettings[game.data.difficulty];
+
+        if (this.generate++ % difficulty.pipeFrequency === 0) {
             var posY = Number.prototype.random(
-                    me.video.renderer.getHeight() - 100,
-                    200
+                me.video.renderer.getHeight() - 100,
+                200
             );
-            var posY2 = posY - me.game.viewport.height - this.pipeHoleSize;
+            var posY2 = posY - me.game.viewport.height - difficulty.pipeHoleSize;
             var pipe1 = new me.pool.pull('pipe', this.posX, posY);
             var pipe2 = new me.pool.pull('pipe', this.posX, posY2);
             var hitPos = posY - 100;
@@ -176,7 +177,7 @@ game.PipeGenerator = me.Renderable.extend({
             me.game.world.addChild(hit, 11);
         }
         this._super(me.Entity, "update", [dt]);
-    },
+    }
 
 });
 
@@ -194,22 +195,21 @@ game.HitEntity = me.Entity.extend({
         this.body.gravity = 0;
         this.updateTime = false;
         this.renderable.alpha = 0;
-        this.body.accel.set(-5, 0);
         this.body.removeShapeAt(0);
         this.body.addShape(new me.Rect(0, 0, settings.width - 30, settings.height - 30));
         this.type = 'hit';
     },
 
     update: function(dt) {
-        // mechanics
-        this.pos.add(this.body.accel);
+        var difficulty = game.data.difficultySettings[game.data.difficulty];
+        this.pos.x += difficulty.pipeSpeed;
         if (this.pos.x < -this.image.width) {
             me.game.world.removeChild(this);
         }
         me.Rect.prototype.updateBounds.apply(this);
         this._super(me.Entity, "update", [dt]);
         return true;
-    },
+    }
 
 });
 
@@ -222,18 +222,17 @@ game.Ground = me.Entity.extend({
         this._super(me.Entity, 'init', [x, y, settings]);
         this.alwaysUpdate = true;
         this.body.gravity = 0;
-        this.body.vel.set(-4, 0);
         this.type = 'ground';
     },
 
     update: function(dt) {
-        // mechanics
-        this.pos.add(this.body.vel);
+        var difficulty = game.data.difficultySettings[game.data.difficulty];
+        this.pos.x += difficulty.groundSpeed;
         if (this.pos.x < -this.renderable.width) {
             this.pos.x = me.video.renderer.getWidth() - 10;
         }
         me.Rect.prototype.updateBounds.apply(this);
         return this._super(me.Entity, 'update', [dt]);
-    },
+    }
 
 });
