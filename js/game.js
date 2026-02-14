@@ -4,7 +4,32 @@ var game = {
         steps: 0,
         start: false,
         newHiScore: false,
-        muted: false
+        muted: false,
+        difficulty: "normal",
+        difficultySettings: {
+            normal: {
+                label: "Normal",
+                pipeSpeed: -5,
+                groundSpeed: -4,
+                pipeFrequency: 92,
+                pipeHoleSize: 1240,
+                gravityStep: 0.2,
+                flapStrength: 72,
+                dangerTheme: false,
+                movingPipes: false
+            },
+            extreme: {
+                label: "Extrême",
+                pipeSpeed: -8,
+                groundSpeed: -6,
+                pipeFrequency: 75,
+                pipeHoleSize: 1080,
+                gravityStep: 0.3,
+                flapStrength: 66,
+                dangerTheme: true,
+                movingPipes: true
+            }
+        }
     },
 
     resources: [
